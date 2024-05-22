@@ -1,69 +1,53 @@
 class HorrorFractal
 {
 
-  private Integer currentNumber;
-  private ArrayList<Integer> sequence;
-  private ArrayList<Circle> horrorCircles;
+  private Sequence sequence;
+  private ArrayList<Circle> fractal;
 
   /* Constructor definition */
   public HorrorFractal()
   {
-    this.currentNumber = 0;
+    this.sequence = new Sequence();
 
-    this.sequence = new ArrayList<Integer>();
-    this.sequence.add(0);
-
-    this.horrorCircles = new ArrayList<Circle>();
-    var position = new PVector();
-    var radius = 0;
-    this.horrorCircles.add(new Circle(position, radius));
+    this.fractal = new ArrayList<Circle>();
+    this.fractal.add(new Circle());
   }
 
   /* Function definition */
-  public void generate()
+  public void animate()
   {
-    var sequenceCanBeGenerated = (this.currentNumber > 0);
-    if (sequenceCanBeGenerated)
+    if (this.sequence.isValid())
     {
-      var previousSequenceValue = this.sequence.get(this.currentNumber - 1);
-      var difference = previousSequenceValue - this.currentNumber;
-
-      var valueLiesInSequence = this.previouslyExisted(this.currentNumber, difference);
-      var goForward = (difference < 0 || valueLiesInSequence);
-      var nextSequenceValue = (goForward ? difference + 2 * this.currentNumber : difference);
-      this.sequence.add(nextSequenceValue);
-
-      var currentSequenceValue = this.sequence.get(this.currentNumber);
-      var posX = (previousSequenceValue + currentSequenceValue) / 2;
-      var position = new PVector(posX, 0);
-      var radius = currentSequenceValue - previousSequenceValue;
-      this.horrorCircles.add(new Circle(position, radius));
+      this.sequence.updateNumbers();
+      this.updateFractal();
     }
 
-    this.currentNumber++;
+    this.sequence.updateIndex();
   }
 
-  private boolean previouslyExisted(int indexLimit, int number)
+  private void updateFractal()
   {
-    for (int k = 0; k < indexLimit; k++)
-    {
-      var numberExists = (number == this.sequence.get(k));
-      if (numberExists) return true;
-    }
-    return false;
+    var aNMinus1 = this.sequence.getPreviousTerm();
+    var aN = this.sequence.getCurrentTerm();
+
+    var posX = (aNMinus1 + aN) / 2;
+    var position = new PVector(posX, 0);
+    var radius = aN - aNMinus1;
+
+    this.fractal.add(new Circle(position, radius));
   }
 
-  public void show()
+  public void render()
   {
-    pushMatrix();
-    translate(0, height / 2);
-
-    if (this.horrorCircles != null && this.horrorCircles.size() != 0)
+    if (this.fractal != null)
     {
-      for (var horrorCircle : this.horrorCircles)
-        horrorCircle.show();
-    }
+      pushMatrix();
+      translate(0, height / 2);
 
-    popMatrix();
+      for (var term : this.fractal)
+        term.render();
+
+      popMatrix();
+    }
   }
 }
